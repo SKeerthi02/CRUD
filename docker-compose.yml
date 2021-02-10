@@ -1,0 +1,38 @@
+version: "3.8"
+   
+services:
+    flask:
+        build: .
+        container_name: flaskapp
+#        command: python app.py runserver 0.0.0.0:5000
+        volumes:
+            - .:/app
+        ports:
+            - "5000:5000"
+        depends_on:
+            pgdb:
+                condition: service_healthy
+    pgdb:
+        image: postgres
+        container_name: testdb
+        environment:
+            - POSTGRES_DB=keerthi
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=mysecretpassword
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+    angular:
+        build: ./crud-frontend
+        container_name: angularapp
+        ports:
+            - "4200:4200"
+        volumes:
+            - ./crud-frontend:/crud-frontend
+#        depends_on:
+#          - pgdb
+#          - flask
+#        command: ng serve --host 0.0.0.0 --port 4200 --poll=2000
+
